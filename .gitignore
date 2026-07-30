@@ -1,0 +1,15 @@
+# Environment / secrets
+.env
+.venv/
+
+# Runtime state produced by create_agent.py
+.agent_id
+.environment_id
+.memory_store_id
+
+# Outputs
+outputs/
+
+# Python
+__pycache__/
+*.pyc
