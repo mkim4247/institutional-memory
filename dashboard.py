@@ -38,6 +38,18 @@ def read_output(name: str) -> str:
     return path.read_text()
 
 
+def fetch_source_docs() -> dict:
+    """Read the actual round1/round2 markdown files fed to the agent as context."""
+    result = {}
+    for round_name, dir_path in (("round1", Path("synthetic-data/round1")), ("round2", Path("synthetic-data/round2"))):
+        docs = []
+        if dir_path.exists():
+            for path in sorted(dir_path.glob("*.md")):
+                docs.append({"name": path.name, "content": path.read_text()})
+        result[round_name] = docs
+    return result
+
+
 def fetch_memory() -> list[dict]:
     if not MEMORY_STORE_ID_PATH.exists():
         return [{"path": "(none)", "content": "Run create_agent.py first."}]
@@ -166,6 +178,7 @@ PAGE_TEMPLATE = """
   .dot.s3 { background: #9b6fc7; }
   .dot.mem { background: var(--accent); }
   .dot.diff { background: var(--danger); }
+  .dot.sources { background: #9a8f6f; }
   .badge {
     background: var(--bg);
     color: var(--muted);
@@ -279,6 +292,7 @@ PAGE_TEMPLATE = """
   <div class="tab" data-view="session3"><span class="dot s3"></span> What Changed?</div>
   <div class="tab" data-view="diff"><span class="dot diff"></span> Memory Diff <span class="badge" id="diff-badge">0</span></div>
   <div class="tab" data-view="memory"><span class="dot mem"></span> Live Memory</div>
+  <div class="tab" data-view="sources"><span class="dot sources"></span> Source Documents</div>
 </div>
 
 <main>
@@ -333,10 +347,29 @@ PAGE_TEMPLATE = """
       </div>
     </div>
   </div>
+
+  <div class="view" id="view-sources">
+    <div class="card">
+      <div class="card-header">
+        <div class="title">Source Documents — What the Agent Reads</div>
+        <div class="actions">
+          <span class="badge" id="round-toggle-1" onclick="setRound('round1')" style="cursor:pointer;">Round 1</span>
+          <span class="badge" id="round-toggle-2" onclick="setRound('round2')" style="cursor:pointer;">Round 2</span>
+        </div>
+      </div>
+      <div class="mem-layout">
+        <div class="mem-list" id="src-list"></div>
+        <div class="mem-content mono" id="src-content">Loading...</div>
+      </div>
+    </div>
+  </div>
 </main>
 
 <script>
 let memoryItems = [];
+let sourceDocs = {round1: [], round2: []};
+let currentRound = 'round1';
+let currentSrcItems = [];
 const timelineSteps = [
   {key: 'round1', label: '1. Round 1 docs'},
   {key: 'session1', label: '2. Session 1'},
@@ -460,11 +493,12 @@ async function loadStaticPanels() {
   document.getElementById('session2').innerHTML = '<span class="placeholder">Loading...</span>';
   document.getElementById('mem-content').innerHTML = '<span class="placeholder">Loading...</span>';
 
-  const [s1, s2, s3, mem] = await Promise.all([
+  const [s1, s2, s3, mem, src] = await Promise.all([
     fetch('/api/session/session1').then(r => r.json()),
     fetch('/api/session/session2').then(r => r.json()),
     fetch('/api/session/session3').then(r => r.json()),
     fetch('/api/memory').then(r => r.json()),
+    fetch('/api/sources').then(r => r.json()),
   ]);
 
   if (s1.exists) setSessionContent('session1', s1.content);
@@ -478,6 +512,9 @@ async function loadStaticPanels() {
   memoryItems = mem.items;
   renderMemList();
   if (memoryItems.length) selectMemItem(0);
+
+  sourceDocs = src;
+  setRound(currentRound);
 
   renderTimeline({session1: s1.exists, session2: s2.exists, session3: s3.exists});
   loadDiff();
@@ -500,6 +537,38 @@ function selectMemItem(idx) {
     el.classList.toggle('active', i === idx);
   });
   document.getElementById('mem-content').innerHTML = renderMarkdown(memoryItems[idx].content);
+}
+
+function setRound(round) {
+  currentRound = round;
+  document.getElementById('round-toggle-1').style.background = round === 'round1' ? 'var(--accent)' : '';
+  document.getElementById('round-toggle-1').style.color = round === 'round1' ? 'white' : '';
+  document.getElementById('round-toggle-2').style.background = round === 'round2' ? 'var(--accent)' : '';
+  document.getElementById('round-toggle-2').style.color = round === 'round2' ? 'white' : '';
+
+  currentSrcItems = sourceDocs[round] || [];
+  renderSrcList();
+  if (currentSrcItems.length) selectSrcItem(0);
+  else document.getElementById('src-content').innerHTML = '<span class="placeholder">No documents in this round.</span>';
+}
+
+function renderSrcList() {
+  const listEl = document.getElementById('src-list');
+  listEl.innerHTML = '';
+  currentSrcItems.forEach((item, idx) => {
+    const div = document.createElement('div');
+    div.className = 'mem-item' + (idx === 0 ? ' active' : '');
+    div.textContent = item.name;
+    div.onclick = () => selectSrcItem(idx);
+    listEl.appendChild(div);
+  });
+}
+
+function selectSrcItem(idx) {
+  document.querySelectorAll('#src-list .mem-item').forEach((el, i) => {
+    el.classList.toggle('active', i === idx);
+  });
+  document.getElementById('src-content').textContent = currentSrcItems[idx].content;
 }
 
 function runLive(sessionKey) {
@@ -615,6 +684,11 @@ def api_session(key):
 @app.route("/api/memory")
 def api_memory():
     return jsonify({"items": fetch_memory()})
+
+
+@app.route("/api/sources")
+def api_sources():
+    return jsonify(fetch_source_docs())
 
 
 @app.route("/api/stream/<key>")
