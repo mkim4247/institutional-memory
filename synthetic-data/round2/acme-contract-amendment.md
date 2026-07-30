@@ -23,6 +23,7 @@ while renewal terms are finalized).
 
 Acme is currently on a month-to-month bridge, not a fresh multi-year term.
 Any renewal proposal should:
+
 1. Acknowledge that pricing has effectively been running at full (non-discounted)
    rate since April 2026.
 2. Address the analytics tier upgrade need (see new support ticket

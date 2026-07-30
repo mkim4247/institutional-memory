@@ -1,6 +1,7 @@
 # Acme Corp — New Support Ticket
 
 ## Ticket #ACME-4589 (Open)
+
 **Opened:** 2026-07-22
 **Priority:** P2
 **Reported by:** Dave Ortiz (Director of IT Operations)

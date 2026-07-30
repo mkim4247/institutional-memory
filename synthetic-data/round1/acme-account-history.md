@@ -8,12 +8,12 @@
 
 ## Key Contacts
 
-| Name | Role | Notes |
-| --- | --- | --- |
-| Sarah Chen | Chief Technology Officer | Primary technical sponsor. Champion since the original deal. Very responsive over email. |
-| Marcus Webb | VP of Engineering | Reports to Sarah. Hands-on with integration issues. |
-| Priya Nair | Head of Procurement | Owns budget approval for renewals. |
-| Dave Ortiz | Director of IT Operations | Manages day-to-day platform admin. |
+| Name        | Role                      | Notes                                                                                    |
+| ----------- | ------------------------- | ---------------------------------------------------------------------------------------- |
+| Sarah Chen  | Chief Technology Officer  | Primary technical sponsor. Champion since the original deal. Very responsive over email. |
+| Marcus Webb | VP of Engineering         | Reports to Sarah. Hands-on with integration issues.                                      |
+| Priya Nair  | Head of Procurement       | Owns budget approval for renewals.                                                       |
+| Dave Ortiz  | Director of IT Operations | Manages day-to-day platform admin.                                                       |
 
 ## Relationship Summary
 

@@ -1,6 +1,7 @@
 # Acme Corp — Recent Support Ticket Log
 
 ## Ticket #ACME-4471 (Resolved)
+
 **Opened:** 2025-08-14
 **Priority:** P1
 **Summary:** Data-sync outage between Acme's warehouse and our pipeline
@@ -12,6 +13,7 @@ Marcus Webb. No credits requested by Acme.
 our on-call engineer.
 
 ## Ticket #ACME-4502 (Resolved)
+
 **Opened:** 2025-10-02
 **Priority:** P3
 **Summary:** Question about API rate limits for a new internal tool Acme was
@@ -20,6 +22,7 @@ building on top of our platform.
 **Sentiment:** Neutral/positive.
 
 ## Ticket #ACME-4530 (Resolved)
+
 **Opened:** 2025-12-11
 **Priority:** P2
 **Summary:** Dave Ortiz reported intermittent login failures for a subset of
