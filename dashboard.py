@@ -70,17 +70,19 @@ PAGE_TEMPLATE = """
 <title>Institutional Memory Agent — Demo Dashboard</title>
 <style>
   :root {
-    --bg: #0f1115;
-    --panel: #171a21;
-    --border: #2a2f3a;
-    --text: #e6e8eb;
-    --muted: #9aa3b2;
-    --accent: #d97757;
-    --accent2: #6aa5ff;
-    --accent3: #7ee3a3;
-    --danger: #ff6b6b;
-    --add: #2ea36b;
-    --rem: #c04b4b;
+    --bg: #f7f7f5;
+    --panel: #ffffff;
+    --border: #e5e3de;
+    --text: #22201d;
+    --muted: #78746c;
+    --accent: #cc7a52;
+    --accent2: #4d7fb0;
+    --accent3: #3e9a68;
+    --danger: #c0463e;
+    --add-bg: #e7f5ec;
+    --add-fg: #1e6b3f;
+    --rem-bg: #fbeceb;
+    --rem-fg: #a3352d;
   }
   * { box-sizing: border-box; }
   body {
@@ -88,142 +90,181 @@ PAGE_TEMPLATE = """
     background: var(--bg);
     color: var(--text);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 15px;
   }
   header {
-    padding: 14px 24px;
+    padding: 18px 28px;
     border-bottom: 1px solid var(--border);
     display: flex;
     align-items: center;
     justify-content: space-between;
+    background: var(--panel);
   }
-  header h1 { font-size: 18px; margin: 0; font-weight: 600; }
-  header .sub { color: var(--muted); font-size: 13px; margin-top: 2px; }
+  header h1 { font-size: 17px; margin: 0; font-weight: 600; }
+  header .sub { color: var(--muted); font-size: 13px; margin-top: 3px; }
   .btn {
     background: var(--accent);
     color: white;
     border: none;
-    padding: 7px 14px;
-    border-radius: 6px;
+    padding: 8px 16px;
+    border-radius: 7px;
     cursor: pointer;
-    font-size: 12.5px;
+    font-size: 13px;
     font-weight: 600;
-    margin-left: 6px;
+    margin-left: 8px;
   }
-  .btn.secondary { background: #2a2f3a; }
-  .btn.small { padding: 4px 10px; font-size: 11.5px; }
-  .btn:hover { opacity: 0.9; }
-  .btn:disabled { opacity: 0.5; cursor: default; }
+  .btn.secondary { background: var(--panel); color: var(--text); border: 1px solid var(--border); }
+  .btn.small { padding: 5px 12px; font-size: 12px; }
+  .btn.ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+  .btn:hover { opacity: 0.88; }
+  .btn:disabled { opacity: 0.45; cursor: default; }
 
   .timeline {
     display: flex;
     align-items: center;
-    gap: 4px;
-    padding: 10px 24px;
-    background: #12141a;
+    gap: 6px;
+    padding: 12px 28px;
+    background: var(--panel);
     border-bottom: 1px solid var(--border);
-    font-size: 12px;
+    font-size: 12.5px;
     color: var(--muted);
+    overflow-x: auto;
   }
   .timeline .step {
-    padding: 4px 10px;
-    border-radius: 12px;
+    padding: 5px 12px;
+    border-radius: 14px;
     border: 1px solid var(--border);
     white-space: nowrap;
+    background: var(--bg);
   }
-  .timeline .step.active { color: var(--text); border-color: var(--accent); background: #201a16; }
-  .timeline .step.done { color: var(--accent3); border-color: #1e3a2c; }
-  .timeline .arrow { color: var(--border); }
+  .timeline .step.done { color: var(--accent3); border-color: #bfe3cd; background: var(--add-bg); }
+  .timeline .arrow { color: #cfccc4; }
 
-  main {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-auto-rows: minmax(220px, 1fr);
-    gap: 1px;
-    background: var(--border);
-  }
-  .panel {
-    background: var(--panel);
+  .tabs {
     display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    min-height: 240px;
-  }
-  .panel-title {
-    padding: 9px 14px;
-    font-size: 12.5px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
+    gap: 2px;
+    padding: 0 28px;
+    background: var(--panel);
     border-bottom: 1px solid var(--border);
+  }
+  .tab {
+    padding: 12px 18px;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
     display: flex;
     align-items: center;
-    gap: 8px;
-    justify-content: space-between;
+    gap: 7px;
   }
-  .panel-title .left { display: flex; align-items: center; gap: 8px; }
-  .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--text); border-bottom-color: var(--accent); }
+  .tab .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
   .dot.s1 { background: var(--accent2); }
   .dot.s2 { background: var(--accent3); }
-  .dot.s3 { background: #c99bff; }
+  .dot.s3 { background: #9b6fc7; }
   .dot.mem { background: var(--accent); }
   .dot.diff { background: var(--danger); }
   .badge {
-    background: #2a2f3a;
-    color: var(--text);
+    background: var(--bg);
+    color: var(--muted);
     font-size: 10.5px;
-    padding: 2px 8px;
+    padding: 2px 9px;
     border-radius: 10px;
     font-weight: 700;
+    border: 1px solid var(--border);
   }
-  .panel-body {
-    padding: 14px;
-    overflow-y: auto;
-    font-size: 12.5px;
-    line-height: 1.55;
-    white-space: pre-wrap;
-    flex: 1;
-  }
-  .row-full { grid-column: 1 / span 2; }
-  .memory-body, .diff-body {
-    display: grid;
-    grid-template-columns: minmax(150px, 200px) 1fr;
+
+  main { padding: 24px 28px 40px; max-width: 980px; margin: 0 auto; }
+  .view { display: none; }
+  .view.active { display: block; }
+
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
     overflow: hidden;
-    flex: 1;
   }
-  .mem-list {
-    border-right: 1px solid var(--border);
-    overflow-y: auto;
+  .card-header {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
   }
-  .mem-item {
-    padding: 8px 14px;
+  .card-header .title { font-size: 14.5px; font-weight: 700; }
+  .card-header .actions { display: flex; align-items: center; gap: 8px; }
+  .card-body {
+    padding: 22px 24px;
+    line-height: 1.65;
+    font-size: 14.5px;
+  }
+  .card-body.mono { font-family: ui-monospace, Menlo, monospace; font-size: 13px; white-space: pre-wrap; }
+
+  .prose h1, .prose h2, .prose h3 { margin: 1.1em 0 0.4em; line-height: 1.3; }
+  .prose h2 { font-size: 1.15em; }
+  .prose h3 { font-size: 1.02em; }
+  .prose p { margin: 0.6em 0; }
+  .prose strong { color: var(--text); }
+  .prose table { border-collapse: collapse; width: 100%; margin: 0.8em 0; font-size: 0.92em; }
+  .prose th, .prose td { border: 1px solid var(--border); padding: 6px 10px; text-align: left; }
+  .prose th { background: var(--bg); font-weight: 700; }
+  .prose hr { border: none; border-top: 1px solid var(--border); margin: 1.2em 0; }
+  .prose .callout {
+    background: #fdf2ee;
+    border-left: 3px solid var(--accent);
+    padding: 10px 14px;
+    border-radius: 6px;
+    margin: 0.8em 0;
+  }
+  .prose ul, .prose ol { padding-left: 1.3em; }
+  .placeholder { color: var(--muted); font-style: italic; }
+
+  .agent-log {
+    margin-top: 4px;
+  }
+  .agent-log summary {
+    cursor: pointer;
+    color: var(--muted);
     font-size: 12px;
+    padding: 6px 0;
+  }
+  .agent-log .log-line {
+    display: block;
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 11.5px;
+    color: var(--muted);
+    padding: 1px 0;
+  }
+  .agent-log .log-line.mem { color: var(--accent); }
+
+  .diff-block { font-family: ui-monospace, Menlo, monospace; font-size: 12.5px; line-height: 1.7; }
+  .diff-line-add { color: var(--add-fg); background: var(--add-bg); display: block; padding: 1px 6px; border-radius: 3px; }
+  .diff-line-rem { color: var(--rem-fg); background: var(--rem-bg); display: block; padding: 1px 6px; border-radius: 3px; }
+  .diff-line-ctx { color: var(--muted); display: block; padding: 1px 6px; }
+
+  .mem-layout { display: grid; grid-template-columns: 200px 1fr; min-height: 400px; }
+  .mem-list { border-right: 1px solid var(--border); }
+  .mem-item {
+    padding: 10px 16px;
+    font-size: 13px;
     cursor: pointer;
     border-bottom: 1px solid var(--border);
     color: var(--muted);
   }
-  .mem-item:hover, .mem-item.active { background: #1f232c; color: var(--text); }
-  .mem-content, .diff-content {
-    padding: 14px;
-    overflow-y: auto;
-    font-size: 12px;
-    line-height: 1.6;
-    white-space: pre-wrap;
-  }
-  .diff-line-add { color: var(--add); background: rgba(46,163,107,0.08); display: block; }
-  .diff-line-rem { color: var(--rem); background: rgba(192,75,75,0.08); display: block; }
-  .diff-line-ctx { color: var(--muted); display: block; }
-  .tool-tag { color: var(--muted); font-style: italic; display: block; margin: 2px 0; }
-  .tool-tag.mem { color: var(--accent); }
-  .status-tag { color: #6b7280; display: block; }
-  ::-webkit-scrollbar { width: 8px; }
-  ::-webkit-scrollbar-thumb { background: #333844; border-radius: 4px; }
+  .mem-item:hover, .mem-item.active { background: var(--bg); color: var(--text); font-weight: 600; }
+  .mem-content { padding: 22px 24px; }
+
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-thumb { background: #d8d4cc; border-radius: 4px; }
 </style>
 </head>
 <body>
 <header>
   <div>
     <h1>Institutional Memory Agent — Demo Dashboard</h1>
-    <div class="sub">Acme Corp / Customer Success scenario &middot; live sessions + live memory store</div>
+    <div class="sub">Acme Corp / Customer Success scenario</div>
   </div>
   <div>
     <button class="btn secondary" onclick="loadStaticPanels()">Refresh</button>
@@ -232,53 +273,64 @@ PAGE_TEMPLATE = """
 
 <div class="timeline" id="timeline"></div>
 
+<div class="tabs" id="tabs">
+  <div class="tab active" data-view="session1"><span class="dot s1"></span> Session 1</div>
+  <div class="tab" data-view="session2"><span class="dot s2"></span> Session 2</div>
+  <div class="tab" data-view="session3"><span class="dot s3"></span> What Changed?</div>
+  <div class="tab" data-view="diff"><span class="dot diff"></span> Memory Diff <span class="badge" id="diff-badge">0</span></div>
+  <div class="tab" data-view="memory"><span class="dot mem"></span> Live Memory</div>
+</div>
+
 <main>
-  <div class="panel">
-    <div class="panel-title">
-      <div class="left"><span class="dot s1"></span> Session 1 — Baseline</div>
-      <div>
-        <button class="btn small" onclick="runLive('session1')">Run Live</button>
+  <div class="view active" id="view-session1">
+    <div class="card">
+      <div class="card-header">
+        <div class="title">Session 1 — Baseline</div>
+        <div class="actions"><button class="btn small" onclick="runLive('session1')">Run Live</button></div>
       </div>
+      <div class="card-body prose" id="session1"><span class="placeholder">Loading...</span></div>
     </div>
-    <div class="panel-body" id="session1">Loading...</div>
   </div>
 
-  <div class="panel">
-    <div class="panel-title">
-      <div class="left"><span class="dot s2"></span> Session 2 — After Memory + New Context</div>
-      <div>
-        <button class="btn small" onclick="runLive('session2')">Run Live</button>
+  <div class="view" id="view-session2">
+    <div class="card">
+      <div class="card-header">
+        <div class="title">Session 2 — After Memory + New Context</div>
+        <div class="actions"><button class="btn small" onclick="runLive('session2')">Run Live</button></div>
       </div>
+      <div class="card-body prose" id="session2"><span class="placeholder">Loading...</span></div>
     </div>
-    <div class="panel-body" id="session2">Loading...</div>
   </div>
 
-  <div class="panel">
-    <div class="panel-title">
-      <div class="left"><span class="dot s3"></span> Session 3 — "What have you learned?"</div>
-      <div>
-        <button class="btn small" onclick="runLive('session3')">Run Live</button>
+  <div class="view" id="view-session3">
+    <div class="card">
+      <div class="card-header">
+        <div class="title">Session 3 — "What have you learned?"</div>
+        <div class="actions"><button class="btn small" onclick="runLive('session3')">Run Live</button></div>
       </div>
+      <div class="card-body prose" id="session3"><span class="placeholder">Not run yet — click Run Live.</span></div>
     </div>
-    <div class="panel-body" id="session3">(not run yet — click Run Live)</div>
   </div>
 
-  <div class="panel">
-    <div class="panel-title">
-      <div class="left"><span class="dot diff"></span> Memory Diff — Session 1 &rarr; Session 2</div>
-      <div>
-        <span class="badge" id="diff-badge">0 changes</span>
-        <button class="btn small" onclick="loadDiff()">Recompute</button>
+  <div class="view" id="view-diff">
+    <div class="card">
+      <div class="card-header">
+        <div class="title">Memory Diff — Before &rarr; After Session 2</div>
+        <div class="actions"><button class="btn small ghost" onclick="loadDiff()">Recompute</button></div>
       </div>
+      <div class="card-body diff-block" id="diff-content">Run session 1, then session 2 (Run Live), then click Recompute.</div>
     </div>
-    <div class="panel-body" id="diff-content">Run session 1 then session 2 (Run Live), then click Recompute.</div>
   </div>
 
-  <div class="panel row-full">
-    <div class="panel-title"><span class="dot mem"></span> Live Memory Store</div>
-    <div class="memory-body">
-      <div class="mem-list" id="mem-list"></div>
-      <div class="mem-content" id="mem-content">Loading...</div>
+  <div class="view" id="view-memory">
+    <div class="card">
+      <div class="card-header">
+        <div class="title">Live Memory Store</div>
+      </div>
+      <div class="mem-layout">
+        <div class="mem-list" id="mem-list"></div>
+        <div class="mem-content prose" id="mem-content">Loading...</div>
+      </div>
     </div>
   </div>
 </main>
@@ -292,6 +344,91 @@ const timelineSteps = [
   {key: 'session2', label: '4. Session 2'},
   {key: 'session3', label: '5. What has it learned?'},
 ];
+
+// --- Tabs ---
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('view-' + tab.dataset.view).classList.add('active');
+  });
+});
+
+// --- Minimal markdown-ish renderer (headers, bold, tables, hr, lists) ---
+function renderMarkdown(text) {
+  if (!text) return '<span class="placeholder">Nothing here yet.</span>';
+
+  const lines = text.split('\\n');
+  let html = '';
+  let inTable = false;
+  let tableRows = [];
+  let inList = false;
+
+  function flushTable() {
+    if (!tableRows.length) return;
+    const [headerRow, sepRow, ...bodyRows] = tableRows;
+    const cells = row => row.split('|').map(c => c.trim()).filter((c, i, arr) => !(i === 0 && c === '') && !(i === arr.length - 1 && c === ''));
+    let t = '<table><thead><tr>';
+    cells(headerRow).forEach(c => t += `<th>${inlineMd(c)}</th>`);
+    t += '</tr></thead><tbody>';
+    bodyRows.forEach(r => {
+      t += '<tr>';
+      cells(r).forEach(c => t += `<td>${inlineMd(c)}</td>`);
+      t += '</tr>';
+    });
+    t += '</tbody></table>';
+    html += t;
+    tableRows = [];
+    inTable = false;
+  }
+
+  function inlineMd(s) {
+    return s
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/\\*\\*(.+?)\\*\\*/g, '<strong>$1</strong>')
+      .replace(/~~(.+?)~~/g, '<del>$1</del>')
+      .replace(/`(.+?)`/g, '<code>$1</code>');
+  }
+
+  for (let raw of lines) {
+    const line = raw;
+    if (/^\\s*\\|.*\\|\\s*$/.test(line)) {
+      inTable = true;
+      tableRows.push(line);
+      continue;
+    } else if (inTable) {
+      flushTable();
+    }
+
+    if (/^---+\\s*$/.test(line.trim())) { html += '<hr/>'; continue; }
+    if (/^###\\s+/.test(line)) { html += `<h3>${inlineMd(line.replace(/^###\\s+/, ''))}</h3>`; continue; }
+    if (/^##\\s+/.test(line)) { html += `<h2>${inlineMd(line.replace(/^##\\s+/, ''))}</h2>`; continue; }
+    if (/^#\\s+/.test(line)) { html += `<h2>${inlineMd(line.replace(/^#\\s+/, ''))}</h2>`; continue; }
+
+    if (/^\\s*[-*]\\s+/.test(line)) {
+      if (!inList) { html += '<ul>'; inList = true; }
+      html += `<li>${inlineMd(line.replace(/^\\s*[-*]\\s+/, ''))}</li>`;
+      continue;
+    } else if (inList) {
+      html += '</ul>';
+      inList = false;
+    }
+
+    if (line.trim() === '') { html += ''; continue; }
+
+    // Callout for lines starting with a warning-ish marker
+    if (/^\\s*(\\u26a0|Critical|IMPORTANT)/i.test(line)) {
+      html += `<div class="callout">${inlineMd(line)}</div>`;
+      continue;
+    }
+
+    html += `<p>${inlineMd(line)}</p>`;
+  }
+  if (inTable) flushTable();
+  if (inList) html += '</ul>';
+  return html;
+}
 
 function renderTimeline(state) {
   const el = document.getElementById('timeline');
@@ -311,10 +448,17 @@ function renderTimeline(state) {
   });
 }
 
+function setSessionContent(elId, rawText) {
+  const el = document.getElementById(elId);
+  // Strip leading meta lines like "=== SESSION 1 ===" and "Question: ..." for readability
+  const cleaned = rawText.replace(/^=== .+? ===\\nQuestion:.+?\\n\\n--- ANSWER ---\\n/s, '');
+  el.innerHTML = renderMarkdown(cleaned);
+}
+
 async function loadStaticPanels() {
-  document.getElementById('session1').textContent = 'Loading...';
-  document.getElementById('session2').textContent = 'Loading...';
-  document.getElementById('mem-content').textContent = 'Loading...';
+  document.getElementById('session1').innerHTML = '<span class="placeholder">Loading...</span>';
+  document.getElementById('session2').innerHTML = '<span class="placeholder">Loading...</span>';
+  document.getElementById('mem-content').innerHTML = '<span class="placeholder">Loading...</span>';
 
   const [s1, s2, s3, mem] = await Promise.all([
     fetch('/api/session/session1').then(r => r.json()),
@@ -323,9 +467,13 @@ async function loadStaticPanels() {
     fetch('/api/memory').then(r => r.json()),
   ]);
 
-  document.getElementById('session1').textContent = s1.content;
-  document.getElementById('session2').textContent = s2.content;
-  if (s3.exists) document.getElementById('session3').textContent = s3.content;
+  if (s1.exists) setSessionContent('session1', s1.content);
+  else document.getElementById('session1').innerHTML = '<span class="placeholder">Not run yet — click Run Live.</span>';
+
+  if (s2.exists) setSessionContent('session2', s2.content);
+  else document.getElementById('session2').innerHTML = '<span class="placeholder">Not run yet — click Run Live.</span>';
+
+  if (s3.exists) setSessionContent('session3', s3.content);
 
   memoryItems = mem.items;
   renderMemList();
@@ -351,14 +499,32 @@ function selectMemItem(idx) {
   document.querySelectorAll('.mem-item').forEach((el, i) => {
     el.classList.toggle('active', i === idx);
   });
-  document.getElementById('mem-content').textContent = memoryItems[idx].content;
+  document.getElementById('mem-content').innerHTML = renderMarkdown(memoryItems[idx].content);
 }
 
 function runLive(sessionKey) {
-  const panel = document.getElementById(sessionKey);
-  panel.innerHTML = '';
+  const el = document.getElementById(sessionKey);
+  el.innerHTML = '';
   const btns = document.querySelectorAll(`button[onclick="runLive('${sessionKey}')"]`);
   btns.forEach(b => b.disabled = true);
+
+  // Switch to that tab automatically
+  document.querySelector(`.tab[data-view="${sessionKey}"]`)?.click();
+
+  const logLines = [];
+  let textBuffer = '';
+
+  const logDetails = document.createElement('details');
+  logDetails.className = 'agent-log';
+  const summary = document.createElement('summary');
+  summary.textContent = 'Agent actions (live)';
+  logDetails.appendChild(summary);
+  const logBody = document.createElement('div');
+  logDetails.appendChild(logBody);
+  el.appendChild(logDetails);
+
+  const answerEl = document.createElement('div');
+  el.appendChild(answerEl);
 
   const es = new EventSource(`/api/stream/${sessionKey}`);
 
@@ -366,30 +532,25 @@ function runLive(sessionKey) {
     const evt = JSON.parse(e.data);
     if (evt.kind === 'status') {
       const line = document.createElement('span');
-      line.className = 'status-tag';
+      line.className = 'log-line';
       line.textContent = evt.message;
-      panel.appendChild(line);
+      logBody.appendChild(line);
     } else if (evt.kind === 'tool') {
       const line = document.createElement('span');
-      line.className = 'tool-tag' + (evt.is_memory ? ' mem' : '');
-      line.textContent = `[${evt.is_memory ? 'memory' : 'tool'}: ${evt.name} ${evt.target}]`;
-      panel.appendChild(line);
+      line.className = 'log-line' + (evt.is_memory ? ' mem' : '');
+      line.textContent = `${evt.is_memory ? 'memory' : 'tool'}: ${evt.name} ${evt.target}`;
+      logBody.appendChild(line);
     } else if (evt.kind === 'text') {
-      const span = document.createElement('span');
-      span.textContent = evt.text;
-      panel.appendChild(span);
-      panel.scrollTop = panel.scrollHeight;
+      textBuffer += evt.text;
+      answerEl.innerHTML = renderMarkdown(textBuffer);
+      el.scrollTop = el.scrollHeight;
     } else if (evt.kind === 'error') {
       const line = document.createElement('span');
-      line.className = 'status-tag';
+      line.className = 'log-line';
       line.style.color = 'var(--danger)';
       line.textContent = 'ERROR: ' + evt.message;
-      panel.appendChild(line);
+      logBody.appendChild(line);
     } else if (evt.kind === 'done') {
-      const line = document.createElement('span');
-      line.className = 'status-tag';
-      line.textContent = '\\n[agent finished]';
-      panel.appendChild(line);
       es.close();
       btns.forEach(b => b.disabled = false);
       loadStaticPanels();
@@ -408,10 +569,13 @@ async function loadDiff() {
   const el = document.getElementById('diff-content');
   el.innerHTML = '';
 
-  document.getElementById('diff-badge').textContent = `${data.change_count} changes`;
+  document.getElementById('diff-badge').textContent = data.change_count;
 
   if (!data.lines.length) {
-    el.textContent = data.message || 'No diff available yet.';
+    const p = document.createElement('div');
+    p.className = 'placeholder';
+    p.textContent = data.message || 'No diff available yet.';
+    el.appendChild(p);
     return;
   }
 
