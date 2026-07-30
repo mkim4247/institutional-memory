@@ -6,6 +6,7 @@
 .agent_id
 .environment_id
 .memory_store_id
+.curator_agent_id
 
 # Outputs
 outputs/
