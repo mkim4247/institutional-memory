@@ -10,6 +10,7 @@
 
 # Outputs
 outputs/
+memory_snapshots/
 
 # Python
 __pycache__/
