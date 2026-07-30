@@ -18,6 +18,7 @@ Usage:
 import difflib
 import json
 import os
+import shutil
 from pathlib import Path
 
 from flask import Flask, Response, jsonify, render_template_string, stream_with_context
@@ -48,6 +49,36 @@ def fetch_source_docs() -> dict:
                 docs.append({"name": path.name, "content": path.read_text()})
         result[round_name] = docs
     return result
+
+
+def reset_demo() -> dict:
+    """
+    Clear the memory store and wipe all local demo artifacts (outputs and
+    memory snapshots) so the dashboard starts from a true blank slate —
+    used by the Reset Demo button.
+    """
+    cleared_memory_paths: list[str] = []
+
+    if MEMORY_STORE_ID_PATH.exists():
+        store_id = MEMORY_STORE_ID_PATH.read_text().strip()
+        api_key = os.environ.get("ANTHROPIC_API_KEY")
+        if api_key:
+            client = Anthropic(api_key=api_key)
+            page = client.beta.memory_stores.memories.list(store_id, path_prefix="/")
+            for item in page.data:
+                if item.type == "memory":
+                    client.beta.memory_stores.memories.delete(item.id, memory_store_id=store_id)
+                    cleared_memory_paths.append(item.path)
+
+    if OUTPUT_DIR.exists():
+        shutil.rmtree(OUTPUT_DIR)
+        OUTPUT_DIR.mkdir(exist_ok=True)
+
+    if SNAPSHOT_DIR.exists():
+        shutil.rmtree(SNAPSHOT_DIR)
+        SNAPSHOT_DIR.mkdir(exist_ok=True)
+
+    return {"cleared_memory_paths": cleared_memory_paths}
 
 
 def fetch_memory() -> list[dict]:
@@ -280,7 +311,8 @@ PAGE_TEMPLATE = """
     <div class="sub">Acme Corp / Customer Success scenario</div>
   </div>
   <div>
-    <button class="btn secondary" onclick="loadStaticPanels()">Refresh</button>
+    <button class="btn secondary" onclick="loadStaticPanels()">Reload</button>
+    <button class="btn" id="reset-btn" onclick="resetDemo()">Reset Demo</button>
   </div>
 </header>
 
@@ -658,6 +690,34 @@ async function loadDiff() {
   });
 }
 
+async function resetDemo() {
+  const btn = document.getElementById('reset-btn');
+  btn.disabled = true;
+  btn.textContent = 'Resetting...';
+
+  try {
+    await fetch('/api/reset', {method: 'POST'});
+  } catch (e) {
+    console.error('Reset failed', e);
+  }
+
+  // Clear session panels immediately for instant feedback
+  document.getElementById('session1').innerHTML = '<span class="placeholder">Not run yet — click Run Live.</span>';
+  document.getElementById('session2').innerHTML = '<span class="placeholder">Not run yet — click Run Live.</span>';
+  document.getElementById('session3').innerHTML = '<span class="placeholder">Not run yet — click Run Live.</span>';
+  document.getElementById('mem-list').innerHTML = '';
+  document.getElementById('mem-content').innerHTML = '<span class="placeholder">Memory store is empty.</span>';
+  document.getElementById('diff-content').innerHTML = '<span class="placeholder">Run session 1 then session 2 (Run Live), then click Recompute.</span>';
+  document.getElementById('diff-badge').textContent = '0';
+  renderTimeline({session1: false, session2: false, session3: false});
+
+  btn.disabled = false;
+  btn.textContent = 'Reset Demo';
+
+  // Jump back to the Session 1 tab so the room sees a clean starting point
+  document.querySelector('.tab[data-view="session1"]')?.click();
+}
+
 loadStaticPanels();
 </script>
 </body>
@@ -689,6 +749,12 @@ def api_memory():
 @app.route("/api/sources")
 def api_sources():
     return jsonify(fetch_source_docs())
+
+
+@app.route("/api/reset", methods=["POST"])
+def api_reset():
+    result = reset_demo()
+    return jsonify({"ok": True, **result})
 
 
 @app.route("/api/stream/<key>")
