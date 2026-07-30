@@ -12,6 +12,9 @@
 outputs/
 memory_snapshots/
 
+# Runtime logs
+dashboard.log
+
 # Python
 __pycache__/
 *.pyc
